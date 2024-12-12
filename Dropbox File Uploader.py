@@ -13,7 +13,7 @@ DROPBOX_FOLDER = "DROPBOX_FOLDER_GOES_HERE"
 LOCAL_FOLDER = os.path.dirname(os.path.abspath(__file__))  # Directory where the script is located
 
 # Script name to exclude from upload
-SCRIPT_NAME = "Book Uploader.py"
+SCRIPT_NAME = "Dropbox File Uploader.py"
 
 def upload_file_to_dropbox(local_path, dropbox_path, dbx):
     """Uploads a file to Dropbox."""
