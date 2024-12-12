@@ -36,6 +36,26 @@ def ensure_dropbox_folder_exists(folder_path, dbx):
         except dropbox.exceptions.ApiError as e:
             print(f"Failed to create folder '{folder_path}': {e}")
 
+def upload_directory(local_directory, dropbox_directory, dbx):
+    """Uploads all files in a directory, including files in subdirectories."""
+    # Traverse the local directory, including subfolders
+    for root, dirs, files in os.walk(local_directory):
+        for file_name in files:
+            local_path = os.path.join(root, file_name)
+
+            # Skip the script itself
+            if file_name != SCRIPT_NAME:
+                # Construct Dropbox path with sub-folder structure
+                relative_path = os.path.relpath(local_path, local_directory)
+                dropbox_path = os.path.join(dropbox_directory, relative_path).replace("\\", "/")  # Ensure forward slashes for Dropbox paths
+
+                # Ensure the folder exists in Dropbox
+                folder_path = os.path.dirname(dropbox_path)
+                ensure_dropbox_folder_exists(folder_path, dbx)
+
+                # Upload the file
+                upload_file_to_dropbox(local_path, dropbox_path, dbx)
+
 def main():
     # Initialize Dropbox client
     dbx = dropbox.Dropbox(ACCESS_TOKEN)
@@ -43,14 +63,8 @@ def main():
     # Ensure the target Dropbox folder exists
     ensure_dropbox_folder_exists(DROPBOX_FOLDER, dbx)
 
-    # Upload all files in the local folder
-    for file_name in os.listdir(LOCAL_FOLDER):
-        local_path = os.path.join(LOCAL_FOLDER, file_name)
-
-        # Skip directories and exclude the script itself
-        if os.path.isfile(local_path) and file_name != SCRIPT_NAME:
-            dropbox_path = f"{DROPBOX_FOLDER}/{file_name}"
-            upload_file_to_dropbox(local_path, dropbox_path, dbx)
+    # Upload all files in the local folder (including subfolders)
+    upload_directory(LOCAL_FOLDER, DROPBOX_FOLDER, dbx)
 
 if __name__ == "__main__":
     main()
